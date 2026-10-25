@@ -2,16 +2,19 @@
 <html lang="en">
 
 <head>
+
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>{% block title %}Cards{% endblock %}</title>
 	<meta name="theme-color" content="#101b33">
 	<link rel="stylesheet"href="{{ url_for('static', filename='css/style.css') }}">
+
 </head>
+
 <body class="app-body">
 
 	<!-- Top navigation -->
-		<nav class="topbar" aria-label="Top navigation">
+	<nav class="topbar" aria-label="Top navigation">
 		<div class="topbar-left">
 			<button type="button" class="menu-toggle" id="menu-toggle"
 				aria-label="Open navigation menu" aria-controls="sidebar"
@@ -24,8 +27,7 @@
 				<span class="brand-icon" aria-hidden="true">
 					<span class="brand-symbol"> ✦ </span>
 				</span>
-				<span class="brand-name">My
-					<span>Cards</span>
+				<span class="brand-name">My-<span>H-Om</span>
 				</span>
 			</a>
 		</div>
@@ -38,24 +40,20 @@
 			{% else %} <a class="topbar-login"href="{{ url_for('login') }}">Log in</a>
 			{% endif %}
 		</div>
-		</nav>
+	</nav>
 	<!-- END Top navigation -->
+
 	<!-- Mobile sidebar backdrop -->
-
-		<div class="sidebar-overlay" id="sidebar-overlay" hidden > </div>
-
+	<div class="sidebar-overlay" id="sidebar-overlay" hidden > </div>
 		<!-- Main sidebar -->
-			<aside class="sidebar" id="sidebar" aria-label="Main navigation" aria-hidden="true" >
-
+		<aside class="sidebar" id="sidebar" aria-label="Main navigation" aria-hidden="true" >
 			<div class="sidebar-heading">
-				<span class="sidebar-label">Simply Tree</span>
+				<span class="sidebar-label">My Gun</span>
 				<button type="button" id="sidebar-close" class="sidebar-close"
 					aria-label="Close navigation menu">&times;
 				</button>
 			</div>
-
-			{% if session.get("user_id") %}
-
+		{% if session.get("user_id") %}
 			<a class="sidebar-link"
 				href="{{ url_for('home') }}">
 				<span class="sidebar-icon" aria-hidden="true">⌂</span>
@@ -64,67 +62,44 @@
 			<a class="sidebar-link"
 				href="{{ url_for('all_cards') }}">
 				<span class="sidebar-icon" aria-hidden="true">▤</span>
-				<span>My Flashcards</span>
+				<span>Saved Videos</span>
 			</a>
-		<a class="sidebar-link"
-			href="{{ url_for('my_sets') }}">
-			<span class="sidebar-icon" aria-hidden="true">▦</span>
-			<span>My Sets</span>
-		</a>
-		<a class="sidebar-link"
-			href="{{ url_for('my_sets') }}">
-			<span class="sidebar-icon" aria-hidden="true">▦</span>
-			<span>Calender</span>
-		</a>
-
-		<div class="sidebar-divider"></div>
-		<span class="sidebar-label">CREATE SOMETHING</span>
-
-
-		<div class="sidebar-spacer"></div>
-		<div class="sidebar-divider"></div>
-
-		<a class="sidebar-link logout-link"
-			href="{{ url_for('logout') }}">
-			<span class="sidebar-icon" aria-hidden="true">↪</span>
-			<span>Log Out</span>
-		</a>
-
+			<a class="sidebar-link"
+				href="{{ url_for('logout') }}">
+				<span class="sidebar-icon" aria-hidden="true">＋</span>
+				<span>Logout</span>
+			</a>
+			<div class="sidebar-divider"></div>
+			<span class="sidebar-label">Devour Prolifically</span>
+			<div class="sidebar-spacer"></div>
+			<div class="sidebar-divider"></div>
 		{% else %}
-
 			<a class="sidebar-link"
 				href="{{ url_for('login') }}">
 				<span class="sidebar-icon" aria-hidden="true">↪</span>
 				<span>Log In</span></a>
-
 			<a class="sidebar-link"
 				href="{{ url_for('register') }}">
 				<span class="sidebar-icon" aria-hidden="true">＋</span>
 				<span>Create Account</span>
 			</a>
-
 		{% endif %}
-
-			<div class="sidebar-footer">
-				<span class="brand-mini">M</span>
-				<span>Learn. Organize. Succeed.</span>
-			</div>
-
-	</aside>
-
+		<div class="sidebar-footer">
+			<span class="brand-mini">M</span>
+			<span>Listen. Engage. Respond.</span>
+		</div>
+		
+		</aside>
+	</div>
 
 	<!-- Page content -->
+	<main class="main" id="main-content">
+		{% block content %}
 
-		<main class="main" id="main-content">
-			{% block content %}
-
-			{% endblock %}
-		</main>
-
-
+		{% endblock %}
+	</main>
 	<!-- Keep existing JavaScript functionality -->
-
-		<script src="{{ url_for('static', filename='js/cards.js') }}"></script>
+	<script src="{{ url_for('static', filename='js/cards.js') }}"></script>
 
 </body>
 </html>

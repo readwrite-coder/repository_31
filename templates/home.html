@@ -4,19 +4,23 @@
 <section class="cards-page">
 	
     <header class="page-heading">
-	<div>
-	    <h1>My Flashcards</h1>
-	    <p>Review your cards or organize them into sets.</p>
+	<div>	
+		<h1>My Video Collection</h1>
+		<p>Review your cards or organize them into sets.</p>
+		<form action="{{ url_for('collect_data') }}" method="POST">
+		    <label>Link:</label>
+		    <input id="q" name="q" placeholder="Search...">
+		    <button type="submit">Search</button>
+		</form>
+		{% if error %}
+			<p>{{ error }}</p>
+		{% endif %}
+		{% if query %}
+			<p>{{ query }}</p>
+		{% endif %}
 	</div>
-
-    </header>
-	
-    
-<!------------------------------------------------------->
-
-<!-------------------------------------------------------->
-
-
+    </header>	
+   
 </section>
 
 {% endblock %}

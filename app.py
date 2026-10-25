@@ -1,4 +1,6 @@
 
+import yt_dlp
+from urllib.parse import urlparse
 ##################################################################################
 from flask import (                                                              #       
         Flask, request, render_template, session,                                #
@@ -76,70 +78,95 @@ with app.app_context():
 ###################################################################################
 ###################################################################################
 
+def get_youtube_title(link):
+    # Parse and validate the URL
+    parsed_url = urlparse(link)
+    domain = parsed_url.netloc.lower().split(":")[0]
 
-@app.route("/cards/all")
-def all_cards():
+    valid_domains = {
+        "youtube.com",
+        "www.youtube.com",
+        "m.youtube.com",
+        "music.youtube.com",
+        "youtu.be",
+        "www.youtu.be",
+    }
+
+    if parsed_url.scheme not in ("http", "https"):
+        raise ValueError("Invalid URL scheme.")
+
+    if domain not in valid_domains:
+        raise ValueError("This is not a YouTube URL.")
+
+    # Extract video information without downloading it
+    options = {
+        "quiet": True,
+        "no_warnings": True,
+        "noplaylist": True,
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(options) as ydl:
+            info = ydl.extract_info(link, download=False)
+
+        if not info or not info.get("title"):
+            raise ValueError("Could not retrieve the video title.")
+
+        return info["title"]
+
+    except yt_dlp.utils.DownloadError as error:
+        raise ValueError(
+            "The YouTube video is invalid, unavailable, "
+            "or could not be accessed."
+        ) from error
+
+@app.route("/data", methods=["GET","POST"])
+def collect_data(): 
     if "user_id" not in session:
         return redirect(url_for("login"))
-    user_id = session["user_id"]
-    sort = request.args.get("sort", "newest")
-    if sort not in ("newest","oldest"):
-        sort = "newest"
-    #validate the page size
-    allowed_size = (10, 25, 50)
-    try:
-        per_page = int(request.args.get("per_page", 10))
-    except (TypeError, ValueError):
-        per_page = 10
-    if per_page not in allowed_size:
-        per_page = 10
-    query = Card.query.filter_by(user_id=user_id)
-    #use card IDs as a temporary proxy
-    if sort == "oldest":
-        query = query.order_by(Card.id.asc())
-    else:
-        query = query.order_by(Card.id.desc())
-    try:
-        page = max(1, int(request.args.get("page", 1)))
-    except (TypeError, ValueError):
-        page = 1
-    cards_page = query.paginate(
-        page=page,
-        per_page=per_page,
-        error_out=False
-    )
-    card_sets = CardSet.query.filter_by(
-         user_id=session["user_id"]
-    ).all()
+    title = None
+    error = None
+    if request.method=="POST":
+        link = request.form.get("q", "").strip()
+        try:
+            title = get_youtube_title(link)
+        except ValueError as e:
+            error = str(e)
+    
     return render_template(
-        "home.html",
-        cards=cards_page.items,
-        cards_page=cards_page,
-        card_sets=card_sets,
-        sort=sort,
-        per_page=per_page   
-    )
+            "home.html",
+            query=title,
+            error=error
+        )
+@app.route("/profile")
+def user_info(): 
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    return render_template("user_prof.html")
+@app.route("/cards/mine")
+def all_my_cards():
+    if "user_id" not in session:
+        return redirect(url_for("login")) 
+    return render_template("home.html")
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        _name = request.form.get("username", "").strip()
-        _word = request.form.get("password", "")
-        _user = User.query.filter_by(username=_name).first()
-        if ( _user and check_password_hash(_user.password_hash, _word)):
+        u_name = request.form.get("username", "").strip()
+        p_word = request.form.get("password", "")
+        the_user = User.query.filter_by(username=u_name).first()
+        if ( the_user and check_password_hash(the_user.password_hash, p_word)):
             session.clear()
-            session["user"] = _user.username
-            session["user_id"] = _user.id
-            return redirect(url_for("all_cards"))
+            session["user"] = the_user.username
+            session["user_id"] = the_user.id
+            return redirect(url_for("all_my_cards"))
         else:
             return render_template("login.html", error="Invalid username or password")
     else:
         return redirect(url_for("home"))
-
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("home"))
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -162,7 +189,6 @@ def register():
         db.session.commit()
         return redirect(url_for("login"))
     return render_template("register.html")
-
 @app.route("/")
 def home():
     if "user_id" not in session:
